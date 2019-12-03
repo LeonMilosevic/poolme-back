@@ -8,11 +8,13 @@ const AuthControler = require("../controllers/auth");
 
 router.post("/signup", userSignupValidator, AuthControler.signup);
 router.post("/signin", AuthControler.signin);
+router.get("/signout", AuthControler.signout);
 
-router.get(
-  "/secret",
-  passport.authenticate("jwt", { session: false }),
-  AuthControler.secret
+// facebook oauth route
+router.post(
+  "/oauth/facebook",
+  passport.authenticate("facebookToken", { session: false }),
+  AuthControler.facebookOAuth
 );
 
 module.exports = router;

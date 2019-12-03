@@ -19,18 +19,40 @@ exports.signup = async (req, res, next) => {
       .json({ errors: errors.array().map(error => error.msg)[0] });
   }
   // --end check for errors
-  const { firstName, lastName, email, password, number } = req.body;
-  // check email
-  const foundUser = await User.findOne({ "local.email": req.body.email });
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    number,
+    driversLicense
+  } = req.body;
+  // check facebook email
+  const foundUser = await User.findOne(
+    { "facebook.email": req.body.email },
+    (error, user) => {
+      if (error || user)
+        return res
+          .status(400)
+          .json({ error: "User exists, try to sign in with email" });
+      // check local mail
+      User.findOne({ "local.email": req.body.email }, (error, user) => {
+        if (error || user)
+          return res
+            .status(400)
+            .json({ error: "User exists, try to sign in with facebook" });
+      });
+    }
+  );
 
-  if (foundUser)
-    return res.status(400).json({ error: "Email is already in use" });
   // create new user
   const user = new User({
+    method: "local",
     local: { email, password },
     firstName,
     lastName,
-    number
+    number,
+    driversLicense
   });
   await user.save();
 
@@ -44,7 +66,8 @@ exports.signup = async (req, res, next) => {
       firstName: user.firstName,
       lastName: user.lastName,
       number: user.number,
-      rating: user.rating
+      rating: user.rating,
+      verified: user.verified
     }
   });
 };
@@ -57,7 +80,6 @@ exports.signin = async (req, res, next) => {
         .status(400)
         .json({ error: "User with that email does not exist" });
     const isMatch = await user.authenticate(password);
-    console.log(isMatch);
     // compare password with hashed
     if (!isMatch)
       return res.status(401).json({ error: "Email and password dont match" });
@@ -77,7 +99,25 @@ exports.signin = async (req, res, next) => {
     });
   });
 };
+//facebook oath
+exports.facebookOAuth = async (req, res) => {
+  const token = JWT.sign({ _id: req.user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1h"
+  });
+  const {
+    _id,
+    facebook: { email, photo }
+  } = req.user;
 
-exports.secret = async (req, res, next) => {
-  console.log("user secret called");
+  return res.json({ token, user: { _id, email, photo } });
+};
+
+exports.signout = (req, res) => {
+  res.json({ message: "signout success" });
+};
+
+exports.isVerified = async (req, res, next) => {
+  if (!req.user.verified)
+    return res.status(401).json({ error: "Please wait to be verified " });
+  next();
 };

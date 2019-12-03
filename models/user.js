@@ -3,32 +3,76 @@ const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
 
 // create schema
-const userSchema = new Schema({
-  local: {
-    email: {
+const userSchema = new Schema(
+  {
+    method: {
       type: String,
-      unique: true,
-      lowercase: true
+      enum: ["local", "facebook"]
     },
-    password: {
-      type: String
+    local: {
+      email: {
+        type: String,
+        unique: true,
+        lowercase: true
+      },
+      password: {
+        type: String
+      }
+    },
+
+    facebook: {
+      id: {
+        type: String
+      },
+      email: {
+        type: String,
+        lowercase: true
+      },
+      photo: {
+        type: String
+      },
+      profileUrl: {
+        type: String
+      }
+    },
+    driversLicense: {
+      type: String,
+      required: true
+    },
+    trips: {
+      type: Number,
+      default: 0
+    },
+    verified: {
+      type: Boolean,
+      default: false
+    },
+    firstName: String,
+    lastName: String,
+    lastName: String,
+    phoneNumber: Number,
+    review: {
+      rating: {
+        type: Number,
+        default: 0
+      },
+      reviews: {
+        type: Number,
+        default: 0
+      }
     }
   },
-  firstName: String,
-  lastName: String,
-  lastName: String,
-  number: Number,
-  rating: Number,
-  reviews: Number
-});
+  { timestamps: true }
+);
 
 userSchema.pre("save", async function(next) {
   try {
+    if (this.method !== "local") {
+      next();
+    }
     const salt = await bcrypt.genSalt(10);
 
-    const passwordHash = await bcrypt.hash(this.local.password, salt);
-
-    this.local.password = passwordHash;
+    this.local.password = await bcrypt.hash(this.local.password, salt);
     next();
   } catch (error) {
     next(error);
