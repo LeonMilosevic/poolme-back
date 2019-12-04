@@ -14,4 +14,9 @@ router.post(
   PostsControler.uploadPost
 );
 
+router.get("/posts", PostsControler.listPosts);
+router.get("/posts/:postById", PostsControler.read);
+
+router.param("postById", PostsControler.postById);
+
 module.exports = router;
