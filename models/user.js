@@ -19,7 +19,6 @@ const userSchema = new Schema(
         type: String
       }
     },
-
     facebook: {
       id: {
         type: String
@@ -35,30 +34,53 @@ const userSchema = new Schema(
         type: String
       }
     },
-    driversLicense: {
+    category: {
       type: String,
-      required: true
+      enum: ["passenger", "driver"]
     },
-    trips: {
-      type: Number,
-      default: 0
+    passenger: {
+      firstName: String,
+      lastName: String,
+      phoneNumber: String,
+      review: {
+        rating: {
+          type: Number,
+          default: 0
+        },
+        reviews: {
+          type: Number,
+          default: 0
+        }
+      }
     },
-    verified: {
-      type: Boolean,
-      default: false
-    },
-    firstName: String,
-    lastName: String,
-    lastName: String,
-    phoneNumber: Number,
-    review: {
-      rating: {
+    driver: {
+      firstName: String,
+      lastName: String,
+      phoneNumber: {
+        type: String,
+        default: ""
+      },
+      driversLicense: {
+        type: String,
+        default: ""
+      },
+      trips: {
         type: Number,
         default: 0
       },
-      reviews: {
-        type: Number,
-        default: 0
+      verified: {
+        type: Boolean,
+        default: false
+      },
+      review: {
+        rating: {
+          type: Number,
+          default: 0
+        },
+        reviews: {
+          type: Number,
+          default: 0
+        }
       }
     }
   },

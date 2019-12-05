@@ -1,5 +1,6 @@
 const JWT = require("jsonwebtoken");
 const User = require("../models/user");
+const expressJwt = require("express-jwt");
 const { validationResult } = require("express-validator");
 const crypto = require("crypto");
 require("dotenv").config();
@@ -8,6 +9,22 @@ const signToken = user => {
   return JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "1d"
   });
+};
+
+exports.userById = (req, res, next, id) => {
+  User.findById(id).exec((error, user) => {
+    if (error || !user)
+      return res.status(400).json({ error: "User not found" });
+
+    req.profile = user;
+    next();
+  });
+};
+
+exports.read = (req, res) => {
+  req.profile.hashed_password = undefined;
+
+  return res.json(req.profile);
 };
 
 exports.signup = async (req, res, next) => {
@@ -19,57 +36,81 @@ exports.signup = async (req, res, next) => {
       .json({ errors: errors.array().map(error => error.msg)[0] });
   }
   // --end check for errors
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    number,
-    driversLicense
-  } = req.body;
+
   // check facebook email
-  const foundUser = await User.findOne(
-    { "facebook.email": req.body.email },
-    (error, user) => {
-      if (error || user)
-        return res
-          .status(400)
-          .json({ error: "User exists, try to sign in with email" });
-      // check local mail
-      User.findOne({ "local.email": req.body.email }, (error, user) => {
-        if (error || user)
-          return res
-            .status(400)
-            .json({ error: "User exists, try to sign in with facebook" });
+  User.findOne({ "facebook.email": req.body.email }, (error, user) => {
+    if (error || user)
+      return res
+        .status(400)
+        .json({ error: "User exists, try to sign in with email" });
+  });
+  User.findOne({ "local.email": req.body.email }, (error, user) => {
+    if (error || user) {
+      return res
+        .status(400)
+        .json({ error: "User exists, try to sign in with facebook" });
+    }
+  });
+
+  if (req.body.category === "driver") {
+    const user = new User({
+      method: "local",
+      local: { email: req.body.email, password: req.body.password },
+      category: "driver",
+      "driver.firstName": req.body.firstName,
+      "driver.lastName": req.body.lastName
+    });
+    try {
+      await user.save();
+      const token = signToken(user);
+
+      // res token
+      return res.status(200).json({
+        token,
+        user: {
+          _id: user._id,
+          category: user.category,
+          firstName: user.driver.firstName,
+          lastName: user.driver.lastName,
+          number: user.driver.number,
+          rating: user.driver.review.rating,
+          review: user.driver.review.reviews,
+          verified: user.driver.verified
+        }
       });
+    } catch (error) {
+      console.log(error.errmsg);
     }
-  );
+  } else {
+    try {
+      const user = new User({
+        method: "local",
+        local: { email: req.body.email, password: req.body.password },
+        category: "passenger",
+        "passenger.firstName": req.body.firstName,
+        "passenger.lastName": req.body.lastName
+      });
+      await user.save();
 
-  // create new user
-  const user = new User({
-    method: "local",
-    local: { email, password },
-    firstName,
-    lastName,
-    number,
-    driversLicense
-  });
-  await user.save();
+      const token = signToken(user);
 
-  const token = signToken(user);
-
-  // res token
-  res.status(200).json({
-    token,
-    user: {
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      number: user.number,
-      rating: user.rating,
-      verified: user.verified
+      // res token
+      return res.status(200).json({
+        token,
+        user: {
+          _id: user._id,
+          category: user.category,
+          firstName: user.passenger.firstName,
+          lastName: user.passenger.lastName,
+          email: user.local.email,
+          number: user.passenger.number,
+          rating: user.passenger.rating
+        }
+      });
+    } catch (error) {
+      console.log(error.errmsg);
     }
-  });
+  }
 };
 
 exports.signin = async (req, res, next) => {
@@ -87,11 +128,12 @@ exports.signin = async (req, res, next) => {
     const token = signToken(user);
 
     // res token
-    res.status(200).json({
+    return res.status(200).json({
       token,
       user: {
         _id: user._id,
         firstName: user.firstName,
+        email: user.local.email,
         lastName: user.lastName,
         number: user.number,
         rating: user.rating
@@ -121,3 +163,14 @@ exports.isVerified = async (req, res, next) => {
     return res.status(401).json({ error: "Please wait to be verified " });
   next();
 };
+
+exports.isAuth = (req, res, next) => {
+  let user = req.profile && req.auth && req.profile._id == req.auth._id;
+  if (!user) return res.status(403).json({ error: "Access denied" });
+  next();
+};
+
+exports.requireSignin = expressJwt({
+  secret: process.env.JWT_SECRET,
+  userProperty: "auth"
+});

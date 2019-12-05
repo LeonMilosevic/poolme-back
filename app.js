@@ -15,10 +15,12 @@ connectDB();
 // routes
 const authRouter = require("./routes/auth");
 const postsRouter = require("./routes/posts");
+const userRouter = require("./routes/user");
 
 // routes middleware
 app.use("/api", authRouter);
 app.use("/api", postsRouter);
+app.use("/api", userRouter);
 
 const port = process.env.PORT || 5000;
 

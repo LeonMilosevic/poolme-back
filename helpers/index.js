@@ -8,7 +8,6 @@ exports.userSignupValidator = [
     .not()
     .isEmpty(),
   check("email", "please include a valid email").isEmail(),
-  check("number", "number must be numerical").isNumeric(),
   check(
     "password",
     "please enter a password with 6 or more characters"
