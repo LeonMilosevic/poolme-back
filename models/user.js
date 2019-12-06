@@ -34,14 +34,13 @@ const userSchema = new Schema(
         type: String
       }
     },
-    category: {
+    phoneNumber: {
       type: String,
-      enum: ["passenger", "driver"]
+      default: ""
     },
+    firstName: String,
+    lastName: String,
     passenger: {
-      firstName: String,
-      lastName: String,
-      phoneNumber: String,
       review: {
         rating: {
           type: Number,
@@ -54,12 +53,6 @@ const userSchema = new Schema(
       }
     },
     driver: {
-      firstName: String,
-      lastName: String,
-      phoneNumber: {
-        type: String,
-        default: ""
-      },
       driversLicense: {
         type: String,
         default: ""

@@ -54,7 +54,8 @@ passport.use(
             email: profile.emails[0].value,
             photo: profile.photos[0].value
           },
-          name: profile.displayName
+          firstName: profile.name.givenName,
+          lastName: profile.name.familyName
         });
 
         await newUser.save();

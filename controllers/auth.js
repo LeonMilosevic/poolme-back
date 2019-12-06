@@ -52,64 +52,32 @@ exports.signup = async (req, res, next) => {
     }
   });
 
-  if (req.body.category === "driver") {
+  try {
     const user = new User({
       method: "local",
       local: { email: req.body.email, password: req.body.password },
-      category: "driver",
-      "driver.firstName": req.body.firstName,
-      "driver.lastName": req.body.lastName
+      firstName: req.body.firstName,
+      lastName: req.body.lastName
     });
-    try {
-      await user.save();
-      const token = signToken(user);
 
-      // res token
-      return res.status(200).json({
-        token,
-        user: {
-          _id: user._id,
-          category: user.category,
-          firstName: user.driver.firstName,
-          lastName: user.driver.lastName,
-          number: user.driver.number,
-          rating: user.driver.review.rating,
-          review: user.driver.review.reviews,
-          verified: user.driver.verified
-        }
-      });
-    } catch (error) {
-      console.log(error.errmsg);
-    }
-  } else {
-    try {
-      const user = new User({
-        method: "local",
-        local: { email: req.body.email, password: req.body.password },
-        category: "passenger",
-        "passenger.firstName": req.body.firstName,
-        "passenger.lastName": req.body.lastName
-      });
-      await user.save();
+    await user.save();
 
-      const token = signToken(user);
+    const token = signToken(user);
 
-      // res token
-      return res.status(200).json({
-        token,
-        user: {
-          _id: user._id,
-          category: user.category,
-          firstName: user.passenger.firstName,
-          lastName: user.passenger.lastName,
-          email: user.local.email,
-          number: user.passenger.number,
-          rating: user.passenger.rating
-        }
-      });
-    } catch (error) {
-      console.log(error.errmsg);
-    }
+    return res.status(200).json({
+      token,
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.local.email,
+        phoneNumber: user.phoneNumber,
+        driver: user.driver,
+        passenger: user.passenger
+      }
+    });
+  } catch (error) {
+    console.log(error.errmsg);
   }
 };
 
@@ -127,16 +95,16 @@ exports.signin = async (req, res, next) => {
 
     const token = signToken(user);
 
-    // res token
     return res.status(200).json({
       token,
       user: {
         _id: user._id,
         firstName: user.firstName,
-        email: user.local.email,
         lastName: user.lastName,
-        number: user.number,
-        rating: user.rating
+        email: user.local.email,
+        phoneNumber: user.phoneNumber,
+        driver: user.driver,
+        passenger: user.passenger
       }
     });
   });
@@ -146,12 +114,20 @@ exports.facebookOAuth = async (req, res) => {
   const token = JWT.sign({ _id: req.user._id }, process.env.JWT_SECRET, {
     expiresIn: "1h"
   });
-  const {
-    _id,
-    facebook: { email, photo }
-  } = req.user;
 
-  return res.json({ token, user: { _id, email, photo } });
+  return res.json({
+    token,
+    user: {
+      _id: req.user._id,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      phoneNumber: req.user.phoneNumber,
+      email: req.user.facebook.email,
+      photo: req.user.facebook.photo,
+      driver: req.user.driver,
+      passenger: req.user.passenger
+    }
+  });
 };
 
 exports.signout = (req, res) => {
