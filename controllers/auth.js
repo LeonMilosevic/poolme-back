@@ -29,11 +29,11 @@ exports.read = (req, res) => {
 
 exports.signup = async (req, res, next) => {
   // --check for errors
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
     return res
       .status(422)
-      .json({ errors: errors.array().map(error => error.msg)[0] });
+      .json({ error: error.array().map(error => error.msg)[0] });
   }
   // --end check for errors
 
