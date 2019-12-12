@@ -29,3 +29,7 @@ exports.postValidator = [
   check("pricePerPassanger", "How much do you charge per person?").isNumeric(),
   check("seats", "How much seats does your car have?").isNumeric()
 ];
+
+exports.isEmpty = obj => {
+  return Object.keys(obj).length === 0;
+};
