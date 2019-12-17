@@ -17,17 +17,21 @@ exports.userSignupValidator = [
 ];
 
 exports.postValidator = [
-  check("from", "Where are is your starting point?")
+  check("addressFrom", "Where are is your starting point?")
     .not()
     .isEmpty(),
-  check("to", "Where is your end destination?")
+  check("addressTo", "Where is your end destination?")
     .not()
     .isEmpty(),
   check("timeOfDeparture", "what time does your journey start?")
     .not()
     .isEmpty(),
-  check("pricePerPassanger", "How much do you charge per person?").isNumeric(),
-  check("seats", "How much seats does your car have?").isNumeric()
+  check("pricePerPassanger", "How much do you charge per person?")
+    .not()
+    .isEmpty(),
+  check("seats", "How much seats does your car have?")
+    .not()
+    .isEmpty()
 ];
 
 exports.isEmpty = obj => {

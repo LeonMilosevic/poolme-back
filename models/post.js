@@ -3,19 +3,23 @@ const Schema = mongoose.Schema;
 
 const postSchema = new Schema(
   {
-    from: {
+    addressFrom: {
       type: String,
       lowercase: true,
       required: true
     },
-    to: {
+    addressFromLatLng: {
+      lat: Number,
+      lng: Number
+    },
+    addressTo: {
       type: String,
       lowercase: true,
       required: true
     },
-    stoppingBy: {
-      type: String,
-      lowercase: true
+    addressToLatLng: {
+      lat: Number,
+      lng: Number
     },
     timeOfDeparture: {
       type: String,
@@ -28,10 +32,6 @@ const postSchema = new Schema(
     seats: {
       type: Number,
       required: true
-    },
-    confirmTwoInTheBack: {
-      type: Boolean,
-      default: false
     },
     extraText: {
       type: String,

@@ -30,6 +30,7 @@ exports.read = (req, res) => {
 exports.signup = async (req, res, next) => {
   // --check for errors
   const error = validationResult(req);
+  console.log(error);
   if (!error.isEmpty()) {
     return res
       .status(422)
@@ -135,7 +136,7 @@ exports.signout = (req, res) => {
 };
 
 exports.isVerified = async (req, res, next) => {
-  if (!req.user.verified)
+  if (!req.user.driver.verified)
     return res.status(401).json({ error: "Please wait to be verified " });
   next();
 };

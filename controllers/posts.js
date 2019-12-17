@@ -21,17 +21,18 @@ exports.uploadPost = async (req, res) => {
   if (!errors.isEmpty()) {
     return res
       .status(422)
-      .json({ errors: errors.array().map(error => error.msg)[0] });
+      .json({ error: errors.array().map(error => error.msg)[0] });
   }
   // save post
   const post = new Post({
-    from: req.body.from,
-    to: req.body.to,
+    addressFrom: req.body.addressFrom,
+    addressFromLatLng: req.body.addressFromLatLng,
+    addressTo: req.body.addressTo,
+    addressToLatLng: req.body.addressToLatLng,
     timeOfDeparture: req.body.timeOfDeparture,
     pricePerPassanger: req.body.pricePerPassanger,
     seats: req.body.seats,
-    extraText: req.body.extraText,
-    stoppingBy: req.body.stoppingBy
+    extraText: req.body.extraText
   });
 
   await post.save();

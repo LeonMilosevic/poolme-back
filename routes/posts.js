@@ -18,5 +18,6 @@ router.get("/posts", PostsControler.listPosts);
 router.get("/posts/:postById", PostsControler.read);
 
 router.param("postById", PostsControler.postById);
+router.param("userId", AuthControler.userById);
 
 module.exports = router;
