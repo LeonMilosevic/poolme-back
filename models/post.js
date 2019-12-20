@@ -21,6 +21,14 @@ const postSchema = new Schema(
       lat: Number,
       lng: Number
     },
+    stoppingBy: {
+      type: String,
+      lowercase: true
+    },
+    stoppingByLatLng: {
+      lat: Number,
+      lng: Number
+    },
     timeOfDeparture: {
       type: String,
       required: true

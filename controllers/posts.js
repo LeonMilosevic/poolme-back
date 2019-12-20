@@ -29,6 +29,8 @@ exports.uploadPost = async (req, res) => {
     addressFromLatLng: req.body.addressFromLatLng,
     addressTo: req.body.addressTo,
     addressToLatLng: req.body.addressToLatLng,
+    stoppingBy: req.body.stoppingBy,
+    stoppingByLatLng: req.body.stoppingByLatLng,
     timeOfDeparture: req.body.timeOfDeparture,
     pricePerPassanger: req.body.pricePerPassanger,
     seats: req.body.seats,
