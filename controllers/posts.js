@@ -2,13 +2,15 @@ const Post = require("../models/post");
 const { validationResult } = require("express-validator");
 
 exports.postById = (req, res, next, id) => {
-  Post.findById(id).exec((error, post) => {
-    if (error || !post)
-      return res.status(400).json({ error: "Post not found" });
+  Post.findById(id)
+    .populate("user")
+    .exec((error, post) => {
+      if (error || !post)
+        return res.status(400).json({ error: "Post not found" });
 
-    req.post = post;
-    next();
-  });
+      req.post = post;
+      next();
+    });
 };
 
 // POST READ
@@ -34,7 +36,8 @@ exports.uploadPost = async (req, res) => {
     timeOfDeparture: req.body.timeOfDeparture,
     pricePerPassanger: req.body.pricePerPassanger,
     seats: req.body.seats,
-    extraText: req.body.extraText
+    extraText: req.body.extraText,
+    user: req.user
   });
 
   await post.save();
