@@ -50,6 +50,10 @@ const userSchema = new Schema(
           type: Number,
           default: 0
         }
+      },
+      history: {
+        type: Array,
+        default: []
       }
     },
     driver: {
@@ -74,6 +78,10 @@ const userSchema = new Schema(
           type: Number,
           default: 0
         }
+      },
+      history: {
+        type: Array,
+        default: []
       }
     }
   },
