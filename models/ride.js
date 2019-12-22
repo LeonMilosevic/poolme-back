@@ -18,8 +18,12 @@ const BookedUser = mongoose.model("BookedUser", BookedUserSchema);
 
 const RideSchema = new Schema(
   {
-    post_id: String,
-    bookedUsers: [BookedUserSchema]
+    postId: String,
+    bookedUsers: [BookedUserSchema],
+    addressFrom: String,
+    addressTo: String,
+    stoppingBy: String,
+    distance: String
   },
   { timestamps: true }
 );
