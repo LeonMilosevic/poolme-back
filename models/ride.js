@@ -23,7 +23,8 @@ const RideSchema = new Schema(
     addressFrom: String,
     addressTo: String,
     stoppingBy: String,
-    distance: String
+    distance: String,
+    timeOfDeparture: String
   },
   { timestamps: true }
 );
