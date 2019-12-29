@@ -4,7 +4,11 @@ const { ObjectId } = mongoose.Schema;
 
 const BookedUserSchema = new Schema(
   {
-    user: { type: ObjectId, ref: "User" },
+    user: {
+      type: ObjectId,
+      ref: "user",
+      required: true
+    },
     status: {
       type: String,
       default: "accepted",
@@ -24,7 +28,8 @@ const RideSchema = new Schema(
     addressTo: String,
     stoppingBy: String,
     distance: String,
-    timeOfDeparture: String
+    timeOfDeparture: String,
+    chat: Array
   },
   { timestamps: true }
 );
