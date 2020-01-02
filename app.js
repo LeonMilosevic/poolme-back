@@ -5,12 +5,9 @@ const cors = require("cors");
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
+const { ioConnect } = require("./controllers/ride");
 
-io.on("connection", () => {
-  let chat;
-  console.log("io connected");
-});
-
+io.on("connection", ioConnect);
 // middleware
 app.use(cors());
 app.use(bodyParser.json());

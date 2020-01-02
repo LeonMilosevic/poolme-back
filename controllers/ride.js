@@ -82,3 +82,56 @@ exports.createRide = (req, res, next) => {
     }
   });
 };
+
+exports.ioConnect = socket => {
+  const rideId = socket.handshake.headers.referer.slice(33);
+  // handle output, send chat messages to client
+  socket.on("output", function(fn) {
+    Ride.findById(rideId, (error, result) => {
+      if (error) return console.log(error);
+
+      fn(result);
+    });
+  });
+
+  socket.on("input", function(data) {
+    let name = data.name;
+    let message = data.message;
+
+    if (name === "" || message === "") {
+      sendStatus("please enter a message");
+    }
+    let user = { name, message };
+    Ride.findByIdAndUpdate(rideId, { $push: { chat: user } });
+  });
+
+  // Ride.findById(rideId, (error, ride) => {
+  //   if (error) return res.status(400).json({ error: error });
+  //   // function to send status
+  //   sendStatus = s => {
+  //     socket.emit("status", s);
+  //   };
+
+  //   // get chats from mongo collection
+  //   socket.emit("output", ride.chat);
+
+  //   // handle input event
+  //   socket.on("input", data => {
+  //     let name = data.name;
+  //     let message = data.message;
+
+  //     // check for name and message
+  //     if (name === "" || message === "") {
+  //       sendStatus("Please enter a name and message");
+  //     } else {
+  //       ride.chat.insert({ name, message });
+  //       io.emit("output", [data]);
+
+  //       sendStatus({
+  //         message: "Message sent",
+  //         clear: true
+  //       });
+  //     }
+  //   });
+  // });
+};
