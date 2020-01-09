@@ -5,9 +5,38 @@ const cors = require("cors");
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
-const { ioConnect } = require("./controllers/ride");
 
-io.on("connection", ioConnect);
+io.on("connection", socket => {
+  const { Ride } = require("./models/ride");
+  const rideId = socket.handshake.headers.referer.slice(33);
+  // handle output, send chat messages to client
+  socket.on("output", function(fn) {
+    Ride.findById(rideId, (error, result) => {
+      if (error) return console.log(error);
+
+      fn(result);
+    });
+  });
+
+  sendStatus = function(s) {
+    socket.emit("status", s);
+  };
+
+  socket.on("input", function(data) {
+    let name = data.name;
+    let message = data.message;
+
+    if (name === "" || message === "") {
+      return sendStatus("please enter a message");
+    }
+    let chat = { name, message };
+    Ride.findByIdAndUpdate(rideId, { $push: { chat } }, (error, result) => {
+      if (error) return sendStatus("there was an error sending your message");
+
+      io.emit("message", chat);
+    });
+  });
+});
 // middleware
 app.use(cors());
 app.use(bodyParser.json());
