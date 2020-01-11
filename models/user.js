@@ -40,49 +40,27 @@ const userSchema = new Schema(
     },
     firstName: String,
     lastName: String,
-    passenger: {
-      review: {
-        rating: {
-          type: Number,
-          default: 0
-        },
-        reviews: {
-          type: Number,
-          default: 0
-        }
-      },
-      history: {
-        type: Array,
-        default: []
-      }
+    verified: {
+      type: Boolean,
+      default: false
     },
-    driver: {
-      driversLicense: {
-        type: String,
-        default: ""
-      },
-      trips: {
+    idCard: {
+      type: String,
+      default: ""
+    },
+    review: {
+      rating: {
         type: Number,
         default: 0
       },
-      verified: {
-        type: Boolean,
-        default: false
-      },
-      review: {
-        rating: {
-          type: Number,
-          default: 0
-        },
-        reviews: {
-          type: Number,
-          default: 0
-        }
-      },
-      history: {
-        type: Array,
-        default: []
+      reviews: {
+        type: Number,
+        default: 0
       }
+    },
+    history: {
+      type: Array,
+      default: []
     }
   },
   { timestamps: true }

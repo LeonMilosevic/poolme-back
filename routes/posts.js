@@ -6,12 +6,19 @@ const passportConf = require("../passport");
 const AuthControler = require("../controllers/auth");
 const PostsControler = require("../controllers/posts");
 const { postValidator } = require("../helpers");
+
 router.post(
   "/posts",
   passport.authenticate("jwt", { session: false }),
-  AuthControler.isVerified,
   postValidator,
   PostsControler.uploadPost
+);
+
+router.post(
+  "/posts/book",
+  passport.authenticate("jwt", { session: false }),
+  PostsControler.decreaseSeats,
+  PostsControler.bookRide
 );
 
 router.get("/posts", PostsControler.listPosts);

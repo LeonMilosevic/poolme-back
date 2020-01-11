@@ -7,11 +7,11 @@ const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
 io.on("connection", socket => {
-  const { Ride } = require("./models/ride");
-  const rideId = socket.handshake.headers.referer.slice(33);
+  const { Post } = require("./models/post");
+  const postId = socket.handshake.headers.referer.slice(33);
   // handle output, send chat messages to client
   socket.on("output", function(fn) {
-    Ride.findById(rideId, (error, result) => {
+    Post.findById(postId, (error, result) => {
       if (error) return console.log(error);
 
       fn(result);
@@ -30,13 +30,18 @@ io.on("connection", socket => {
       return sendStatus("please enter a message");
     }
     let chat = { name, message };
-    Ride.findByIdAndUpdate(rideId, { $push: { chat } }, (error, result) => {
-      if (error) return sendStatus("there was an error sending your message");
+    Post.findByIdAndUpdate(
+      postId,
+      { $push: { "ride.chat": chat } },
+      (error, result) => {
+        if (error) return sendStatus("there was an error sending your message");
 
-      io.emit("message", chat);
-    });
+        io.emit("message", chat);
+      }
+    );
   });
 });
+
 // middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -48,13 +53,11 @@ connectDB();
 const authRouter = require("./routes/auth");
 const postsRouter = require("./routes/posts");
 const userRouter = require("./routes/user");
-const rideRouter = require("./routes/ride");
 
 // routes middleware
 app.use("/api", authRouter);
 app.use("/api", postsRouter);
 app.use("/api", userRouter);
-app.use("/api", rideRouter);
 
 const port = process.env.PORT || 5000;
 

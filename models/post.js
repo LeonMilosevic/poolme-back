@@ -2,6 +2,24 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { ObjectId } = mongoose.Schema;
 
+const BookedUserSchema = new Schema(
+  {
+    user: {
+      type: ObjectId,
+      ref: "user",
+      required: true
+    },
+    status: {
+      type: String,
+      default: "accepted",
+      enum: ["accepted", "not accepted"]
+    }
+  },
+  { timestamps: true }
+);
+
+const BookedUser = mongoose.model("BookedUser", BookedUserSchema);
+
 const postSchema = new Schema(
   {
     addressFrom: {
@@ -30,6 +48,10 @@ const postSchema = new Schema(
       lat: Number,
       lng: Number
     },
+    distance: {
+      type: String,
+      required: true
+    },
     timeOfDeparture: {
       type: String,
       required: true
@@ -47,10 +69,17 @@ const postSchema = new Schema(
       trim: true,
       max: 150
     },
+    petsAllowed: String,
+    smokingAllowed: String,
+    twoPeopleInTheBack: String,
     user: {
       type: ObjectId,
       ref: "user",
       required: true
+    },
+    ride: {
+      bookedUsers: [BookedUserSchema],
+      chat: Array
     }
   },
   { timestamps: true }
@@ -61,4 +90,4 @@ const Post = mongoose.model("post", postSchema);
 
 // export model
 
-module.exports = Post;
+module.exports = { Post, BookedUser };

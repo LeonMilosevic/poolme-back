@@ -33,7 +33,7 @@ exports.uploadLicense = (req, res) => {
 
         return User.findByIdAndUpdate(
           req.profile._id,
-          { $set: { "driver.driversLicense": result.secure_url } },
+          { $set: { idCard: result.secure_url } },
           (error, success) => {
             if (error) return res.status(400).json({ error: "Image db error" });
 

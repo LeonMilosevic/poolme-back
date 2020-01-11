@@ -1,4 +1,5 @@
-const Post = require("../models/post");
+const { Post, BookedUser } = require("../models/post");
+const User = require("../models/user");
 const { validationResult } = require("express-validator");
 
 exports.postById = (req, res, next, id) => {
@@ -18,7 +19,8 @@ exports.read = (req, res) => {
   return res.json(req.post);
 };
 
-exports.uploadPost = async (req, res) => {
+exports.uploadPost = async (req, res, next) => {
+  // checking express validator for errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res
@@ -36,13 +38,63 @@ exports.uploadPost = async (req, res) => {
     timeOfDeparture: req.body.timeOfDeparture,
     pricePerPassanger: req.body.pricePerPassanger,
     seats: req.body.seats,
+    distance: req.body.distance,
     extraText: req.body.extraText,
     user: req.user
   });
+  // add the user who posted to bookeduser reference
+  const bookedUser = new BookedUser({ user: req.user._id });
+
+  post.ride.bookedUsers.push(bookedUser);
 
   await post.save();
+  // add the post to user history
+  User.findByIdAndUpdate(
+    req.user._id,
+    { $push: { history: post } },
+    (error, response) => {
+      if (error)
+        return res.status(400).json({ error: "could not update history" });
 
-  res.status(200).json({ success: "posted successfuly" });
+      return res.status(200).json({ success: "posted successfuly" });
+    }
+  );
+};
+
+exports.decreaseSeats = (req, res, next) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    { $inc: { seats: -req.body.seats } },
+    (error, response) => {
+      if (error)
+        return res.status(400).json({ error: "could not update seats" });
+
+      next();
+    }
+  );
+};
+
+exports.bookRide = (req, res) => {
+  // add a new user who booked the ride to bookeduser reference
+  const bookedUser = new BookedUser({ user: req.user._id });
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    { $push: { "ride.bookedUsers": bookedUser } },
+    (error, response) => {
+      if (error) return res.status(400).json({ error: "could not book" });
+      // add the post to user history
+      User.findByIdAndUpdate(
+        req.user._id,
+        { $push: { history: response } },
+        (error, result) => {
+          if (error)
+            return res.status(400).json({ error: "could not add to history" });
+
+          return res.status(200).json({ success: "booked successfully" });
+        }
+      );
+    }
+  );
 };
 
 exports.listPosts = (req, res, next) => {

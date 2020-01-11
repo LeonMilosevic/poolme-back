@@ -71,8 +71,10 @@ exports.signup = async (req, res, next) => {
         lastName: user.lastName,
         email: user.local.email,
         phoneNumber: user.phoneNumber,
-        driver: user.driver,
-        passenger: user.passenger
+        verified: user.verified,
+        review: user.review,
+        idCard: user.idCard,
+        history: user.history
       }
     });
   } catch (error) {
@@ -102,8 +104,10 @@ exports.signin = async (req, res, next) => {
         lastName: user.lastName,
         email: user.local.email,
         phoneNumber: user.phoneNumber,
-        driver: user.driver,
-        passenger: user.passenger
+        verified: user.verified,
+        idCard: user.idCard,
+        review: user.review,
+        history: user.history
       }
     });
   });
@@ -123,20 +127,16 @@ exports.facebookOAuth = async (req, res) => {
       phoneNumber: req.user.phoneNumber,
       email: req.user.facebook.email,
       photo: req.user.facebook.photo,
-      driver: req.user.driver,
-      passenger: req.user.passenger
+      review: req.user.review,
+      verified: req.user.verified,
+      idCard: req.user.idCard,
+      history: req.user.history
     }
   });
 };
 
 exports.signout = (req, res) => {
   res.json({ message: "signout success" });
-};
-
-exports.isVerified = async (req, res, next) => {
-  if (!req.user.driver.verified)
-    return res.status(401).json({ error: "Please wait to be verified " });
-  next();
 };
 
 exports.isAuth = (req, res, next) => {
