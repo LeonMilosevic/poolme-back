@@ -3,7 +3,7 @@ const connectDB = require("./config/db");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
-const server = require("http").createServer(app);
+const server = require("http").Server(app);
 const io = require("socket.io")(server);
 
 io.on("connection", socket => {
@@ -59,7 +59,7 @@ app.use("/api", authRouter);
 app.use("/api", postsRouter);
 app.use("/api", userRouter);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8080;
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
